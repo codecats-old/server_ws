@@ -1,18 +1,25 @@
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<link href="jquery.cssemoticons.css" media="screen" rel="stylesheet" type="text/css" />
+
+<script src="jquery.cssemoticons.js" type="text/javascript"></script>
+
 Users:
 <ul></ul>
 Messages:
-<div></div>
+<div id="my"></div>
 <button>Send</button>
 <textarea></textarea>
 <script>
+
 function addUser(user, myself) {
-    if (user.id === myself) {
-        myself = '#';
-    } else {
-        myself = '';
+    if ($('ul li[value="' + user.id + '"]').length === 0) {
+        if (user.id === myself) {
+            myself = '#';
+        } else {
+            myself = '';
+        }
+    	$('ul').append('<li value="' + user.id + '"><img width="50px" src="data:image/png;base64,' + user.avatar + '" />' + myself + user.name + ': ' + user.id + '</li>');
     }
-	$('ul').append('<li value="' + user.id + '"><img width="50px" src="data:image/png;base64,' + user.avatar + '" />' + myself + user.name + ': ' + user.id + '</li>');
 }
 function getAvatar(id) { 
     return $('ul li[value="' + id + '"]>img').clone();
@@ -28,11 +35,13 @@ ws.onopen = function (ev) {
 ws.onmessage = function(ev){
     var msg = JSON.parse(ev.data);
     if (msg.msg){
-        $('div').append([getAvatar(msg.sender.id)])
-    	$('div').append(msg.sender.name + ': ' + msg.msg + '<br />');
+        $('div').append([getAvatar(msg.sender.id), msg.sender.id + '- ' + msg.msg + '<br />'])
+        $('div').emoticonize();
+
     }
     if (msg.received) {
     	$('div').append('✓ <br />');
+        $('div').emoticonize();
     }
     if (msg.user) {
     	addUser(msg.user);
@@ -50,8 +59,9 @@ ws.onmessage = function(ev){
     }
 }
 $('button').click(function () {
-    $('div').append([getAvatar(ws.user)])
-    $('div').append($('textarea').val())
+    $('div').append([getAvatar(ws.user), ' ', $('textarea').val()])
+    $('div').emoticonize();
 	ws.send($('textarea').val());
+    
 });
 </script>
